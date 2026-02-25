@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "472986937285",
+    "firebase_url": "https://manas-backend-82b34-default-rtdb.firebaseio.com",
+    "project_id": "manas-backend-82b34",
+    "storage_bucket": "manas-backend-82b34.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:472986937285:android:4677d42a084c6e9d864dac",
+        "android_client_info": {
+          "package_name": "com.manasbandhan.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfEXK_KmfPWknfBXP0C4OBEl3o2Dmlkes"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
