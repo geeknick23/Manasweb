@@ -1,0 +1,5 @@
+{
+    "mode": "YOLO",
+    "depth": "Quick",
+    "parallelization": "Parallel"
+}
