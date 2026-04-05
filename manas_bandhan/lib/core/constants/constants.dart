@@ -5,7 +5,7 @@ class ApiConstants {
   // For local development: Use --dart-define=API_URL=http://localhost:5001
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://192.168.1.16:5001', // Local Development URL (LAN IP)
+    defaultValue: 'http://192.168.1.2:5001', // Local Development URL (LAN IP)
   );
   static const String apiUrl = '$baseUrl/api';
   

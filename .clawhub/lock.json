@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "ui-audit": {
+      "version": "1.0.1",
+      "installedAt": 1770064420645
+    },
+    "agent-browser": {
+      "version": "0.2.0",
+      "installedAt": 1770064422451
+    }
+  }
+}

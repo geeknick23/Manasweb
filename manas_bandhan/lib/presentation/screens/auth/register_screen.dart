@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Religion? _religion;
   Caste? _caste;
   int _childrenCount = 0;
-  String _verificationMethod = 'email'; // 'email' or 'whatsapp'
+  String _verificationMethod = 'email'; // 'email' or 'sms'
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -105,7 +105,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Validate fields on the current page before proceeding
     if (_currentPage == 0) {
        // Validate Basic Info
-       final isEmailValid = _verificationMethod == 'whatsapp' || 
+       final isEmailValid = _verificationMethod == 'sms' || 
                             (_emailController.text.isNotEmpty && _emailController.text.contains('@'));
        final isPhoneValid = _phoneController.text.isNotEmpty && _phoneController.text.length >= 10;
        final isPasswordValid = _passwordController.text.isNotEmpty && _passwordController.text.length >= 6;
@@ -402,35 +402,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: null, // Disabled: () => setState(() => _verificationMethod = 'whatsapp'),
+                          onTap: () => setState(() => _verificationMethod = 'sms'),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: _verificationMethod == 'sms' 
+                                  ? AppColors.primary 
+                                  : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
+                              boxShadow: _verificationMethod == 'sms'
+                                  ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                                  : null,
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Via WhatsApp',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '(Coming Soon)',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade600,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              'Via SMS',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: _verificationMethod == 'sms' ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -519,7 +509,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     prefixIcon: const Icon(Icons.phone_outlined),
                     prefixText: '+91 ',
                     counterText: '',
-                    suffixIcon: _verificationMethod == 'whatsapp' 
+                    suffixIcon: _verificationMethod == 'sms' 
                         ? const Icon(Icons.check_circle, color: AppColors.success) 
                         : null,
                   ),

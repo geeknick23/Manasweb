@@ -35,17 +35,17 @@ class RegisterRequested extends AuthEvent {
   List<Object?> get props => [userData];
 }
 
-class WhatsAppLoginRequested extends AuthEvent {
+class SmsLoginRequested extends AuthEvent {
   final String phoneNumber;
-  const WhatsAppLoginRequested({required this.phoneNumber});
+  const SmsLoginRequested({required this.phoneNumber});
   @override
   List<Object?> get props => [phoneNumber];
 }
 
-class VerifyWhatsAppLoginRequested extends AuthEvent {
+class VerifySmsLoginRequested extends AuthEvent {
   final String phoneNumber;
   final String otp;
-  const VerifyWhatsAppLoginRequested({required this.phoneNumber, required this.otp});
+  const VerifySmsLoginRequested({required this.phoneNumber, required this.otp});
   @override
   List<Object?> get props => [phoneNumber, otp];
 }
@@ -181,8 +181,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
-    on<WhatsAppLoginRequested>(_onWhatsAppLoginRequested);
-    on<VerifyWhatsAppLoginRequested>(_onVerifyWhatsAppLoginRequested);
+    on<SmsLoginRequested>(_onSmsLoginRequested);
+    on<VerifySmsLoginRequested>(_onVerifySmsLoginRequested);
     on<VerifyOtpRequested>(_onVerifyOtpRequested);
     on<ResendOtpRequested>(_onResendOtpRequested);
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
@@ -239,26 +239,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onWhatsAppLoginRequested(
-    WhatsAppLoginRequested event,
+  Future<void> _onSmsLoginRequested(
+    SmsLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
     try {
-      await _authRepository.initiateWhatsAppLogin(event.phoneNumber);
+      await _authRepository.initiateSmsLogin(event.phoneNumber);
       emit(AuthNeedsOtpVerification(identifier: event.phoneNumber));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> _onVerifyWhatsAppLoginRequested(
-    VerifyWhatsAppLoginRequested event,
+  Future<void> _onVerifySmsLoginRequested(
+    VerifySmsLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
     try {
-      final result = await _authRepository.verifyWhatsAppLogin(
+      final result = await _authRepository.verifySmsLogin(
         event.phoneNumber,
         event.otp,
       );
@@ -279,7 +279,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _authRepository.register(event.userData);
       
       // After registration, user needs to verify OTP
-      final identifier = event.userData['verification_method'] == 'whatsapp' 
+      final identifier = event.userData['verification_method'] == 'sms' 
         ? event.userData['phone_number'] 
         : event.userData['email'] ?? event.userData['phone_number'];
 

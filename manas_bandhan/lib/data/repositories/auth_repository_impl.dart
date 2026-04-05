@@ -62,25 +62,25 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> initiateWhatsAppLogin(String phoneNumber) async {
+  Future<void> initiateSmsLogin(String phoneNumber) async {
     try {
       await _apiClient.post(
-        '/auth/whatsapp/login',
+        '/auth/sms/login',
         data: {'phone_number': phoneNumber},
       );
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? 'Failed to initiate WhatsApp login';
+      final message = e.response?.data?['message'] ?? 'Failed to send SMS OTP';
       throw Exception(message);
     } catch (e) {
-      throw Exception('WhatsApp login failed: ${e.toString()}');
+      throw Exception('SMS login failed: ${e.toString()}');
     }
   }
 
   @override
-  Future<AuthResult> verifyWhatsAppLogin(String phoneNumber, String otp) async {
+  Future<AuthResult> verifySmsLogin(String phoneNumber, String otp) async {
     try {
       final response = await _apiClient.post(
-        '/auth/whatsapp/verify',
+        '/auth/sms/verify',
         data: {
           'phone_number': phoneNumber,
           'code': otp,
@@ -92,7 +92,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       return AuthResult(token: token, user: user);
     } on DioException catch (e) {
-      final message = e.response?.data?['message'] ?? 'WhatsApp verification failed';
+      final message = e.response?.data?['message'] ?? 'SMS verification failed';
       throw Exception(message);
     } catch (e) {
       throw Exception('Verification failed: ${e.toString()}');

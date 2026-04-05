@@ -17,15 +17,15 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _emailFormKey = GlobalKey<FormState>();
-  final _whatsappFormKey = GlobalKey<FormState>();
+  final _smsFormKey = GlobalKey<FormState>();
   
   // Email Login Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   
-  // WhatsApp Login Controllers
-  final _whatsappPhoneController = TextEditingController();
+  // SMS Login Controllers
+  final _smsPhoneController = TextEditingController();
   final _otpController = TextEditingController();
   bool _isOtpSent = false;
   
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     _tabController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _whatsappPhoneController.dispose();
+    _smsPhoneController.dispose();
     _otpController.dispose();
     super.dispose();
   }
@@ -58,21 +58,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     }
   }
 
-  void _handleWhatsAppSendOtp() {
-    if (_whatsappFormKey.currentState!.validate()) {
+  void _handleSmsSendOtp() {
+    if (_smsFormKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-        WhatsAppLoginRequested(
-          phoneNumber: _whatsappPhoneController.text.trim(),
+        SmsLoginRequested(
+          phoneNumber: _smsPhoneController.text.trim(),
         )
       );
     } 
   }
 
-  void _handleWhatsAppVerify() {
+  void _handleSmsVerify() {
     if (_otpController.text.length == 6) {
        context.read<AuthBloc>().add(
-        VerifyWhatsAppLoginRequested(
-           phoneNumber: _whatsappPhoneController.text.trim(),
+        VerifySmsLoginRequested(
+           phoneNumber: _smsPhoneController.text.trim(),
            otp: _otpController.text.trim()
         )
       );
@@ -94,11 +94,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         if (state is Authenticated) {
           Navigator.pushReplacementNamed(context, AppRouter.main);
         } else if (state is AuthNeedsOtpVerification) {
-           // If we are in WhatsApp tab, it means OTP was sent
+           // If we are in SMS tab, it means OTP was sent
            if (_tabController.index == 1) {
               setState(() => _isOtpSent = true);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('OTP sent to your WhatsApp number')),
+                const SnackBar(content: Text('OTP sent to your phone via SMS')),
               );
            } else {
              // Email flow 2FA
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     },
                                     tabs: const [
                                        Tab(text: 'Email', height: 44),
-                                       Tab(text: 'WhatsApp (Soon)', height: 44),
+                                       Tab(text: 'SMS OTP', height: 44),
                                     ],
                                   ),
                                 ).animate().fadeIn(delay: 700.ms),
@@ -324,19 +324,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         ),
                                       ),
                                       
-                                      // WhatsApp Login Form
+                                      // SMS Login Form
                                       Form(
-                                        key: _whatsappFormKey,
+                                        key: _smsFormKey,
                                         child: Column(
                                           children: [
                                              TextFormField(
-                                               controller: _whatsappPhoneController,
+                                               controller: _smsPhoneController,
                                                enabled: !_isOtpSent,
                                                keyboardType: TextInputType.phone,
                                                decoration: InputDecoration(
-                                                 labelText: 'WhatsApp Number',
+                                                 labelText: 'Phone Number',
                                                  hintText: 'e.g., 919876543210',
-                                                 prefixIcon: const Icon(Icons.message_outlined, color: AppColors.success),
+                                                 prefixIcon: Icon(Icons.sms_outlined, color: AppColors.primary.withOpacity(0.7)),
                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                                                ),
                                                validator: (value) => (value?.isEmpty ?? true) ? 'Required' : null,
@@ -373,13 +373,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                               width: double.infinity,
                                               height: 56,
                                               child: ElevatedButton(
-                                                onPressed: null, // Disabled for "Coming Soon" -> _isLoading ? null : (_isOtpSent ? _handleWhatsAppVerify : _handleWhatsAppSendOtp),
+                                                onPressed: _isLoading ? null : (_isOtpSent ? _handleSmsVerify : _handleSmsSendOtp),
                                                 style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.grey.shade400, // Disabled state
-                                                  elevation: 0,
+                                                  elevation: 8,
+                                                  shadowColor: AppColors.primary.withOpacity(0.4),
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                                 ),
-                                                child: const Text('Coming Soon', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70)),
+                                                child: _isLoading
+                                                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                                    : Text(
+                                                        _isOtpSent ? 'Verify & Login' : 'Send OTP via SMS',
+                                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                      ),
                                               ),
                                             ).animate().fadeIn(delay: 900.ms),
                                           ],

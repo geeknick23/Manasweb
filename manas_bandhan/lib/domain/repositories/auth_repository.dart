@@ -10,8 +10,8 @@ class AuthResult {
 abstract class AuthRepository {
   Future<AuthResult> login(String phoneOrEmail, String password);
   Future<void> register(Map<String, dynamic> userData);
-  Future<void> initiateWhatsAppLogin(String phoneNumber);
-  Future<AuthResult> verifyWhatsAppLogin(String phoneNumber, String otp);
+  Future<void> initiateSmsLogin(String phoneNumber);
+  Future<AuthResult> verifySmsLogin(String phoneNumber, String otp);
   Future<void> verifyOtp(String identifier, String otp);
   Future<void> resendOtp(String identifier);
   Future<User> getCurrentUser();
