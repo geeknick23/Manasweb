@@ -4,7 +4,10 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const dotenv = require('dotenv');
 // Load environment variables FIRST (before any route imports that use process.env)
-dotenv.config({ path: '.env.local' });
+// Only load .env.local in development; in production, Railway injects env vars directly
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: '.env.local' });
+}
 
 const express = require('express');
 const cors = require('cors');
