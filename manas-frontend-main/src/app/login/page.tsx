@@ -37,7 +37,8 @@ export default function LoginPage() {
       toast.success('Welcome back! 🌸');
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Login failed. Please check your credentials.');
+      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please check your credentials.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
