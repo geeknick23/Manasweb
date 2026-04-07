@@ -134,8 +134,15 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// MongoDB connection options optimized for serverless
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/manas';
+// MongoDB — require a real URI in production (Railway has no local MongoDB)
+const rawMongoUri = process.env.MONGODB_URI?.trim();
+if (!rawMongoUri && process.env.NODE_ENV === 'production') {
+  console.error(
+    'CRITICAL: MONGODB_URI is missing. In Railway → Variables, set MONGODB_URI to your MongoDB Atlas connection string (mongodb+srv://...).'
+  );
+  process.exit(1);
+}
+const MONGODB_URI = rawMongoUri || 'mongodb://localhost:27017/manas';
 const MONGODB_OPTIONS = {
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
@@ -157,7 +164,18 @@ const connectDB = async () => {
     }
 
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI:', MONGODB_URI ? 'Set' : 'Not set');
+    if (rawMongoUri) {
+      const hint = rawMongoUri.startsWith('mongodb+srv')
+        ? 'Atlas (SRV)'
+        : rawMongoUri.includes('localhost')
+          ? 'localhost'
+          : 'custom URI';
+      console.log('MongoDB URI: from environment (' + hint + ')');
+    } else {
+      console.warn(
+        'MongoDB URI: not set in environment — using default mongodb://localhost:27017/manas (local dev only)'
+      );
+    }
 
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI, MONGODB_OPTIONS);

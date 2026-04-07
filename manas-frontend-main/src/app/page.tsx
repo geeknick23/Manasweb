@@ -10,6 +10,8 @@ import SuccessStoryCard from '@/components/SuccessStoryCard';
 import HeroCarousel from '@/components/HeroCarousel';
 import { ImpactCardType, AchievementCardType, SuccessStoryType } from '@/types/cards';
 
+export const revalidate = 60; // Revalidate at most every 60 seconds
+
 const homeProgramIcons: Record<MarketingProgramIcon, typeof GraduationCap> = {
   graduation: GraduationCap,
   puzzle: Puzzle,
