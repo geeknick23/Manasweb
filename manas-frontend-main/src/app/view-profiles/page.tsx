@@ -63,7 +63,9 @@ export default function ViewProfilesPage() {
       const activeFilters = currentFilters || filters;
 
       const response = await api.getAllProfiles(activeFilters);
-      setProfiles(response.profiles);
+      // Filter out any null/undefined profiles (can happen if referenced users were deleted)
+      const validProfiles = (response.profiles || []).filter((p): p is User => p != null);
+      setProfiles(validProfiles);
       setPagination(response.pagination);
     } catch (error) {
       console.error('Failed to fetch profiles:', error);

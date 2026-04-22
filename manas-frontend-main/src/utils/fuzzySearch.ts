@@ -17,6 +17,7 @@ export function filterProfiles(profiles: User[], query: string): User[] {
   const q = query.trim().toLowerCase();
   if (!q) return profiles;
   return profiles.filter(profile => {
+    if (!profile) return false;
     const name = profile.full_name?.toLowerCase() || '';
     const profession = profile.profession?.toLowerCase() || '';
     const location = [
