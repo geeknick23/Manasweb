@@ -41,8 +41,8 @@ export default function ProfilePage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const myInterests = currentUser?.expressed_interests || [];
-  const receivedInterests = currentUser?.received_interests || [];
+  const myInterests = (currentUser?.expressed_interests || []).filter(i => i?.user != null);
+  const receivedInterests = (currentUser?.received_interests || []).filter(i => i?.user != null);
 
   useEffect(() => {
     if (!loading && !currentUser) {
