@@ -63,6 +63,7 @@ export default function Footer() {
                 { href: '/media', label: 'Media' },
                 { href: '/contact', label: 'Contact' },
                 { href: '/privacy-policy', label: 'Privacy Policy' },
+                { href: '/child-safety-standards', label: 'Child Safety Standards' },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -220,6 +221,12 @@ export default function Footer() {
               className="text-sm text-slate-500 transition-colors duration-200 hover:text-primary-400"
             >
               Privacy Policy
+            </Link>
+            <Link
+              href="/child-safety-standards"
+              className="text-sm text-slate-500 transition-colors duration-200 hover:text-primary-400"
+            >
+              Child Safety
             </Link>
             <p className="flex items-center gap-1 text-sm text-slate-500">
               Made with{' '}
