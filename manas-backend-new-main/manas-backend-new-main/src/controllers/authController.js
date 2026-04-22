@@ -6,8 +6,19 @@ const { OTP } = require('../models/OTP.js');
 const { PasswordResetOTP } = require('../models/PasswordResetOTP.js');
 const { sendOTPEmail, sendPasswordResetOTPEmail } = require('../services/emailService.js');
 const smsService = require('../services/smsService.js');
+const { formatPhone } = require('../services/smsService.js');
 const { registerSchema, loginSchema, verifyOTPSchema } = require('../validations/auth.js');
 const { uploadImage, isBase64DataUrl } = require('../services/cloudinaryService.js');
+
+// Normalize phone to 10-digit local format for consistent DB storage & lookup
+const normalizePhone = (phone) => {
+  if (!phone) return phone;
+  let p = String(phone).replace(/[\s\-\+]/g, '');
+  // Strip leading 91 country code to get 10-digit number
+  if (p.length === 12 && p.startsWith('91')) p = p.slice(2);
+  if (p.length === 11 && p.startsWith('0')) p = p.slice(1);
+  return p;
+};
 
 // Register new user
 const register = async (req, res) => {
@@ -88,7 +99,7 @@ const register = async (req, res) => {
       marital_status,
       education,
       profession,
-      phone_number,
+      phone_number: normalizePhone(phone_number),
       interests_hobbies,
       brief_personal_description,
       location,
@@ -107,10 +118,13 @@ const register = async (req, res) => {
     // Send OTP based on verification method
     const method = req.body.verification_method;
 
+    // Use the same normalized phone that was saved to DB
+    const normalizedPhone = normalizePhone(phone_number);
+
     try {
       if (method === 'sms' || (!method && !email)) {
         // SMS: MSG91 generates and delivers the OTP (no MongoDB storage needed)
-        await smsService.sendOTP(phone_number);
+        await smsService.sendOTP(normalizedPhone);
         console.log('OTP sent via MSG91 SMS');
         res.status(201).json({
           message: 'Registration successful. Please check your phone for verification code.',
@@ -236,7 +250,7 @@ const verifyOTP = async (req, res) => {
       return res.status(400).json({ message: 'Email or Phone is required' });
     }
 
-    const query = email ? { email } : { phone_number };
+    const query = email ? { email } : { phone_number: normalizePhone(phone_number) };
     const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
@@ -284,13 +298,14 @@ const initiateSmsLogin = async (req, res) => {
       return res.status(400).json({ message: 'Phone number is required' });
     }
 
-    const user = await User.findOne({ phone_number });
+    const normalized = normalizePhone(phone_number);
+    const user = await User.findOne({ phone_number: normalized });
     if (!user) {
-      return res.status(400).json({ message: 'User not found. Please register first.' });
+      return res.status(404).json({ message: 'Mobile number not registered. Please register first.' });
     }
 
     try {
-      await smsService.sendOTP(phone_number);
+      await smsService.sendOTP(normalized);
       res.json({ message: 'OTP sent via SMS' });
     } catch (err) {
       console.error('SMS Send Error:', err);
@@ -312,14 +327,15 @@ const verifySmsLogin = async (req, res) => {
       return res.status(400).json({ message: 'Phone number and code are required' });
     }
 
-    const user = await User.findOne({ phone_number });
+    const normalized = normalizePhone(phone_number);
+    const user = await User.findOne({ phone_number: normalized });
     if (!user) {
-      return res.status(400).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'Mobile number not registered. Please register first.' });
     }
 
     // Verify OTP via MSG91
     try {
-      await smsService.verifyOTP(phone_number, code);
+      await smsService.verifyOTP(normalized, code);
     } catch (err) {
       return res.status(400).json({ message: err.message || 'Invalid or expired OTP' });
     }
@@ -360,7 +376,9 @@ const resendOTP = async (req, res) => {
 
     if (!email && !phone_number) return res.status(400).json({ message: 'Email or Phone is required' });
 
-    const query = email ? { email } : { phone_number };
+    // Normalize phone for DB lookup (matches how it was stored at registration)
+    const normalizedPhone = phone_number ? normalizePhone(phone_number) : null;
+    const query = email ? { email } : { phone_number: normalizedPhone };
     const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
@@ -371,8 +389,8 @@ const resendOTP = async (req, res) => {
     }
 
     if (phone_number && !email) {
-      // Phone-based: Use MSG91's resend API
-      await smsService.resendOTP(phone_number);
+      // Phone-based: Use MSG91's resend API (pass normalized phone)
+      await smsService.resendOTP(normalizedPhone);
     } else {
       // Email-based: Generate new OTP and store in MongoDB
       const otp = crypto.randomInt(100000, 999999).toString();
