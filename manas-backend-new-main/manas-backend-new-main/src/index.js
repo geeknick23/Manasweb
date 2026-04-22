@@ -33,6 +33,9 @@ const corsOptions = {
   origin: [
     process.env.FRONTEND_URL,
     process.env.ADMIN_URL,
+    'https://manasweb-production.up.railway.app',  // Railway frontend
+    'https://manasweb-production-0a66.up.railway.app', // Railway backend self
+    'https://manas2.netlify.app',  // Netlify (legacy)
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:5001',

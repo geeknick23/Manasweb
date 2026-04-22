@@ -1,11 +1,11 @@
 class ApiConstants {
   // Base URL - configurable via environment variable
-  // For production: Use --dart-define=API_URL=https://your-api.vercel.app
-  // For Android emulator: Use --dart-define=API_URL=http://10.0.2.2:5000
-  // For local development: Use --dart-define=API_URL=http://localhost:5001
+  // For production: Use --dart-define=API_URL=https://manasweb-production-0a66.up.railway.app
+  // For Android emulator: Use --dart-define=API_URL=http://10.0.2.2:5001
+  // For local development: Use --dart-define=API_URL=http://192.168.1.14:5001
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://192.168.1.2:5001', // Local Development URL (LAN IP)
+    defaultValue: 'https://manasweb-production-0a66.up.railway.app', // Production Railway backend
   );
   static const String apiUrl = '$baseUrl/api';
   
