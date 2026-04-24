@@ -91,10 +91,10 @@ export default function ViewProfilePage() {
   };
 
   const sentInterest = currentUser?.expressed_interests?.find(
-    (entry) => entry.user._id === profileId
+    (entry) => entry?.user?._id === profileId
   );
   const receivedInterest = currentUser?.received_interests?.find(
-    (entry) => entry.user._id === profileId
+    (entry) => entry?.user?._id === profileId
   );
 
   if (loading || loadingProfile) {
