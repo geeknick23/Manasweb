@@ -58,7 +58,8 @@ const register = async (req, res) => {
       }
     }
 
-    const existingPhone = await User.findOne({ phone_number });
+    const normalizedPhone = normalizePhone(phone_number);
+    const existingPhone = await User.findOne({ phone_number: normalizedPhone });
     if (existingPhone) {
       return res.status(400).json({
         message: 'Phone number already registered'
@@ -118,8 +119,7 @@ const register = async (req, res) => {
     // Send OTP based on verification method
     const method = req.body.verification_method;
 
-    // Use the same normalized phone that was saved to DB
-    const normalizedPhone = normalizePhone(phone_number);
+    // Use the normalized phone that was saved to DB
 
     try {
       if (method === 'sms' || (!method && !email)) {
