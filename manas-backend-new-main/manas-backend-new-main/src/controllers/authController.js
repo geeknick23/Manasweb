@@ -47,10 +47,12 @@ const register = async (req, res) => {
 
     console.log('Registration attempt for:', email || phone_number);
 
-    // Check if user already exists (only by email now)
+    // Normalize email
+    const normalizedEmail = (email && email.trim() !== '') ? email.toLowerCase().trim() : undefined;
+
     // Check if user already exists
-    if (email) {
-      const existingUser = await User.findOne({ email });
+    if (normalizedEmail) {
+      const existingUser = await User.findOne({ email: normalizedEmail });
       if (existingUser) {
         return res.status(400).json({
           message: 'Email already registered'
@@ -91,7 +93,7 @@ const register = async (req, res) => {
     // Create new user
     const user = new User({
       full_name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       profile_photo: cloudinaryPhotoUrl,
       has_profile_photo: !!cloudinaryPhotoUrl,
@@ -139,7 +141,7 @@ const register = async (req, res) => {
         const otpDoc = new OTP({ userId: user._id, otp, expiry: otpExpiry });
         await otpDoc.save();
 
-        await sendOTPEmail(email, otp);
+        await sendOTPEmail(normalizedEmail, otp);
         console.log('OTP email sent successfully');
         res.status(201).json({
           message: 'Registration successful. Please check your email for verification code.',
@@ -189,7 +191,7 @@ const login = async (req, res) => {
 
     // Check if user exists (only by email now)
     const user = await User.findOne({
-      email: username_or_email
+      email: username_or_email.toLowerCase().trim()
     });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
@@ -250,7 +252,7 @@ const verifyOTP = async (req, res) => {
       return res.status(400).json({ message: 'Email or Phone is required' });
     }
 
-    const query = email ? { email } : { phone_number: normalizePhone(phone_number) };
+    const query = email ? { email: email.toLowerCase().trim() } : { phone_number: normalizePhone(phone_number) };
     const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
@@ -378,7 +380,7 @@ const resendOTP = async (req, res) => {
 
     // Normalize phone for DB lookup (matches how it was stored at registration)
     const normalizedPhone = phone_number ? normalizePhone(phone_number) : null;
-    const query = email ? { email } : { phone_number: normalizedPhone };
+    const query = email ? { email: email.toLowerCase().trim() } : { phone_number: normalizedPhone };
     const user = await User.findOne(query);
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
@@ -398,7 +400,7 @@ const resendOTP = async (req, res) => {
       await OTP.deleteMany({ userId: user._id });
       const otpDoc = new OTP({ userId: user._id, otp, expiry: otpExpiry });
       await otpDoc.save();
-      await sendOTPEmail(email, otp);
+      await sendOTPEmail(email.toLowerCase().trim(), otp);
     }
 
     res.json({ message: 'New OTP sent successfully' });
